@@ -23,7 +23,6 @@ const filterItems = getSearchParamAsArray(Astro.url, "tools");
 if (filterItems.length > 0) {
   projects = projects.filter((project) => {
     const projectTools = project.data.icons.map((t) => t.id);
-    console.log(projectTools);
     return filterItems.some((i) => projectTools.includes(i));
   });
 }
@@ -31,7 +30,7 @@ if (filterItems.length > 0) {
 ---
 
 <BaseLayout
-  title="Pete's Projects"
+  title="Peters Projects"
   description="Here are some recent projects I’ve done for clients."
 >
   <div>
@@ -43,7 +42,11 @@ if (filterItems.length > 0) {
 
           {
             filterItems.length > 0 && (
-              <button class="btn badge relative" aria-pressed="true">
+              <button
+                class="btn badge relative"
+                aria-pressed="true"
+                id="close-all"
+              >
                 <Icon
                   name="icon--close"
                   aria-hidden="true"
@@ -60,9 +63,8 @@ if (filterItems.length > 0) {
             allTools.map((t) => (
               <li>
                 <button
-                  id="close-all"
                   class="btn badge relative"
-                  data-tool="t.id"
+                  data-tool={t.id}
                   aria-pressed={filterItems.includes(t.id)}
                 >
                   <span>{t.data.title}</span>
@@ -88,39 +90,48 @@ if (filterItems.length > 0) {
   <ContactForm />
 </BaseLayout>
 
+
 <script>
-  import getSearchParamAsArray from "@/lib/getSearchParamAsArray";
-  import setNewURLParams from "@/lib/SetNewURLParams";
+    // import statments
+    import getSearchParamAsArray from "@/lib/getSearchParamAsArray";
+  import setNewURLParams from "@/lib/setNewURLParams";
 
   // query selectors
-  const filters = document.querySelectorAll("[data-tool]") as NodeListOf<HTMLButtonElement>;
+  const filters = document.querySelectorAll(
+    "[data-tool]"
+  ) as NodeListOf<HTMLButtonElement>;
   const clearAllBtn = document.querySelector("#close-all");
-  
+
   // clear all
   clearAllBtn?.addEventListener("click", () => {
     window.location.href = "projects";
   });
+
   // filtering
   filters.forEach((filter) => {
     filter.addEventListener("click", () => {
       const isPressed = filter.getAttribute("aria-pressed") === "true";
+
       filter.setAttribute("aria-pressed", isPressed ? "false" : "true");
 
       // get all existing params
-      const existingParams = getSearchParamAsArray(new URL(window.location.href), "tools");
+      const existingParams = getSearchParamAsArray(
+        new URL(window.location.href),
+        "tools"
+      );
 
-      const newParams = isPressed 
-        ? existingParams.filter(p => p !== filter?.dataset?.tool) 
+      const newParams = isPressed
+        ? existingParams.filter((p) => p !== filter?.dataset?.tool)
         : [...existingParams, filter?.dataset?.tool];
-      console.log(newParams);
 
-      const newUrl= setNewURLParams({
+      // set new URL
+      const newUrl = setNewURLParams({
         key: "tools",
         url: new URL(window.location.href),
         valueArray: newParams as string[],
       });
 
-      window.location.assign(newUrl.toString())
+      window.location.assign(newUrl.toString());
     });
   });
 </script>

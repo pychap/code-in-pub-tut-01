@@ -1,0 +1,38 @@
+---
+// Astro tools
+import { Image } from "astro:assets";
+import { getCollection } from "astro:content";
+
+// components
+import PostCard from "@/components/ui/PostCard.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Me from "@/assets/avatar.jpg";
+import Heading from "@/components/ui/Heading.astro";
+
+// data
+const allPosts = await getCollection("posts", ({ data }) => !data.isDraft);
+---
+
+<BaseLayout title="Blog">
+  <section>
+    <div class="blog-wrapper">
+      <div class="columns">
+        <Image src={Me} class="avatar" alt="Peter Chapman" width={140} />
+        <div class="rows">
+          <div class="columns">
+            <Heading tagName="h1" size="h2">Thoughts9</Heading>
+          </div>
+          <p>Thoughts about life in the web world, outside of the web-world and more.</p>
+        </div>
+      </div>
+      <div class="grid-wrapper">
+        {
+          allPosts.map((post) => (
+            <PostCard post={post} />
+          ))
+        }
+
+      </div>
+    </div>
+  </section>
+</BaseLayout>
