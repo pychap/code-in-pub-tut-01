@@ -1,0 +1,58 @@
+---
+import type { GetStaticPaths } from "astro";
+// Astro tools
+import { Image } from "astro:assets";
+import { getCollection } from "astro:content";
+
+// components
+import PostCard from "@ui/PostCard.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Me from "@/assets/avatar.jpg";
+import Heading from "@ui/Heading.astro";
+import Link from "@ui/Link.astro";
+
+// data
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const allPosts = await getCollection("posts", ({ data }) => !data.isDraft);
+  return paginate(allPosts.sort((a, b) => new Date(b.data.pubDate).getUTCDate() - new Date(a.data.pubDate).getUTCDate()
+  ), 
+  { pageSize: 2 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+---
+
+<BaseLayout title=`My Thoughts | Page ${page.currentPage}`>
+  <section>
+    <div class="blog-wrapper">
+      <div class="columns">
+        <Image src={Me} class="avatar" alt="Peter Chapman" width={140} />
+        <div class="rows">
+          <div class="columns">
+            <Heading tagName="h1" size="h2">Thoughts</Heading>
+            <p class="uppercase text-accent"><strong>Page {page.currentPage}</strong></p>
+          </div>
+          <p>Thoughts about life in the web world, outside of the web-world and more.</p>
+        </div>
+      </div>
+      <div class="grid-wrapper">
+        {
+          page.data.map((post) => (
+            <PostCard post={post} />
+          ))
+        }
+      </div>
+      <div class="pagination">
+        {
+        page.url.prev && 
+          <Link href={page.url.prev} variant="badge">Previous</Link>
+        }
+        {
+        page.url.next && 
+          <Link href={page.url.next} variant="badge">Next</Link>
+        }
+      </div>
+    </div>
+  </section>
+</BaseLayout>
